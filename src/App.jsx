@@ -14,6 +14,7 @@ import jsPDF from 'jspdf'
 import html2canvas from 'html2canvas'
 import * as XLSX from 'xlsx'
 import { createPortal } from 'react'
+import asterixLogo from './assets/Asterix-logo-Full-Color-1024x387.png'
 
 // Import logos
 import fayeLogo from './assets/faye-logo.png'
@@ -21,15 +22,20 @@ import ijlLogo from './assets/ijl-logo.png'
 
 function App() {
   // Current Business Metrics
-  const [annualRevenue, setAnnualRevenue] = useState(24000000)
-  const [monthlyLeads, setMonthlyLeads] = useState(833)
-  const [currentConversionRate, setCurrentConversionRate] = useState(22)
-  const [avgCustomerValue, setAvgCustomerValue] = useState(3000)
-  const [currentResponseTime, setCurrentResponseTime] = useState(24)
-  const [salesStaff, setSalesStaff] = useState(25)
-  const [matchmakers, setMatchmakers] = useState(35)
-  const [devHoursWeek, setDevHoursWeek] = useState(8)
-  const [newHiresYear, setNewHiresYear] = useState(8)
+  const [clientsPerYear, setClientsPerYear] = useState(2000)
+  const [onboardingTimePre, setOnboardingTimePre] = useState(3.0)
+  const [onboardingTimePost, setOnboardingTimePost] = useState(1.5)
+  const [staffHourlyRate, setStaffHourlyRate] = useState(50)
+  const [duplicateRate, setDuplicateRate] = useState(5)
+  const [resolutionTime, setResolutionTime] = useState(1.5)
+  const [canopyCost, setCanopyCost] = useState(10000)
+  const [dropboxCost, setDropboxCost] = useState(3000)
+  const [esignCost, setEsignCost] = useState(3000)
+  const [capacityIncrease, setCapacityIncrease] = useState(20)
+  const [revenuePerClient, setRevenuePerClient] = useState(2000)
+  const [docHandlingHours, setDocHandlingHours] = useState(300)
+  const [docAdminRate, setDocAdminRate] = useState(40)
+  const [docRiskBuffer, setDocRiskBuffer] = useState(5000)
 
   // Cost Parameters
   const [crmImplementationCost, setCrmImplementationCost] = useState(150000)
@@ -62,6 +68,16 @@ function App() {
   const [salesProductivityRate, setSalesProductivityRate] = useState(15)
   const [matchmakerProductivityRate, setMatchmakerProductivityRate] = useState(12)
 
+  // Forecasted Improvements
+  const [onboardingTimeReduction, setOnboardingTimeReduction] = useState(40) // % reduction
+  const [duplicateRateReduction, setDuplicateRateReduction] = useState(50) // % reduction
+  const [resolutionTimeReduction, setResolutionTimeReduction] = useState(40) // % reduction
+  const [canopyCostReduction, setCanopyCostReduction] = useState(70) // % reduction
+  const [dropboxCostReduction, setDropboxCostReduction] = useState(90) // % reduction (mostly eliminated)
+  const [esignCostReduction, setEsignCostReduction] = useState(90) // % reduction (mostly eliminated)
+  const [docHandlingHoursReduction, setDocHandlingHoursReduction] = useState(30) // % reduction
+  const [docRiskBufferReduction, setDocRiskBufferReduction] = useState(40) // % reduction
+
   // Build vs Buy Comparison
   const [implementationType, setImplementationType] = useState('sugarcrm')
   const [implementationTimeline, setImplementationTimeline] = useState(3)
@@ -75,6 +91,112 @@ function App() {
   const [saveName, setSaveName] = useState('');
   const [showLoadMenu, setShowLoadMenu] = useState(false);
 
+  // Preset scenario values for Asterix
+  const scenarioPresets = {
+    Conservative: {
+      clientsPerYear: 1500,
+      onboardingTimePre: 3.5,
+      onboardingTimePost: 2.0,
+      staffHourlyRate: 40,
+      duplicateRate: 7,
+      resolutionTime: 2.0,
+      canopyCost: 12000,
+      dropboxCost: 4000,
+      esignCost: 3500,
+      capacityIncrease: 10,
+      revenuePerClient: 1500,
+      docHandlingHours: 400,
+      docAdminRate: 35,
+      docRiskBuffer: 8000,
+      // More conservative improvement percentages
+      onboardingTimeReduction: 30,
+      duplicateRateReduction: 40,
+      resolutionTimeReduction: 30,
+      canopyCostReduction: 60,
+      dropboxCostReduction: 80,
+      esignCostReduction: 80,
+      docHandlingHoursReduction: 20,
+      docRiskBufferReduction: 30
+    },
+    Moderate: {
+      clientsPerYear: 2000,
+      onboardingTimePre: 3.0,
+      onboardingTimePost: 1.5,
+      staffHourlyRate: 50,
+      duplicateRate: 5,
+      resolutionTime: 1.5,
+      canopyCost: 10000,
+      dropboxCost: 3000,
+      esignCost: 3000,
+      capacityIncrease: 20,
+      revenuePerClient: 2000,
+      docHandlingHours: 300,
+      docAdminRate: 40,
+      docRiskBuffer: 5000,
+      // Moderate improvement percentages
+      onboardingTimeReduction: 40,
+      duplicateRateReduction: 50,
+      resolutionTimeReduction: 40,
+      canopyCostReduction: 70,
+      dropboxCostReduction: 90,
+      esignCostReduction: 90,
+      docHandlingHoursReduction: 30,
+      docRiskBufferReduction: 40
+    },
+    Aggressive: {
+      clientsPerYear: 3000,
+      onboardingTimePre: 2.5,
+      onboardingTimePost: 0.75,
+      staffHourlyRate: 60,
+      duplicateRate: 3,
+      resolutionTime: 1.0,
+      canopyCost: 8000,
+      dropboxCost: 2000,
+      esignCost: 2000,
+      capacityIncrease: 30,
+      revenuePerClient: 2500,
+      docHandlingHours: 200,
+      docAdminRate: 50,
+      docRiskBuffer: 2000,
+      // Aggressive improvement percentages
+      onboardingTimeReduction: 50,
+      duplicateRateReduction: 60,
+      resolutionTimeReduction: 50,
+      canopyCostReduction: 80,
+      dropboxCostReduction: 95,
+      esignCostReduction: 95,
+      docHandlingHoursReduction: 40,
+      docRiskBufferReduction: 50
+    }
+  };
+
+  const applyScenarioPreset = (preset) => {
+    const values = scenarioPresets[preset];
+    setClientsPerYear(values.clientsPerYear);
+    setOnboardingTimePre(values.onboardingTimePre);
+    setOnboardingTimePost(values.onboardingTimePost);
+    setStaffHourlyRate(values.staffHourlyRate);
+    setDuplicateRate(values.duplicateRate);
+    setResolutionTime(values.resolutionTime);
+    setCanopyCost(values.canopyCost);
+    setDropboxCost(values.dropboxCost);
+    setEsignCost(values.esignCost);
+    setCapacityIncrease(values.capacityIncrease);
+    setRevenuePerClient(values.revenuePerClient);
+    setDocHandlingHours(values.docHandlingHours);
+    setDocAdminRate(values.docAdminRate);
+    setDocRiskBuffer(values.docRiskBuffer);
+    // Apply improvement percentages
+    setOnboardingTimeReduction(values.onboardingTimeReduction || 40);
+    setDuplicateRateReduction(values.duplicateRateReduction || 50);
+    setResolutionTimeReduction(values.resolutionTimeReduction || 40);
+    setCanopyCostReduction(values.canopyCostReduction || 70);
+    setDropboxCostReduction(values.dropboxCostReduction || 90);
+    setEsignCostReduction(values.esignCostReduction || 90);
+    setDocHandlingHoursReduction(values.docHandlingHoursReduction || 30);
+    setDocRiskBufferReduction(values.docRiskBufferReduction || 40);
+  };
+
   // Helper function to format currency without cents
   const formatCurrency = (amount) => {
     return Math.round(amount).toLocaleString()
@@ -82,12 +204,6 @@ function App() {
 
   // Reset all improvement metrics to baseline (no impact)
   const resetToBaseline = () => {
-    // Set target values equal to current values
-    setTargetConversionRate(currentConversionRate)
-    setTargetResponseTime(currentResponseTime)
-    setTargetDevHoursWeek(devHoursWeek)
-    setTargetTrainingDays(0)
-    
     // Reset all improvement rates to 0
     setRetentionImprovement(0)
     setUpsellingRate(0)
@@ -101,11 +217,27 @@ function App() {
   const saveCurrentScenario = (name) => {
     if (!name) return;
     const currentState = {
-      annualRevenue, monthlyLeads, currentConversionRate, avgCustomerValue,
-      currentResponseTime, salesStaff, matchmakers, devHoursWeek, newHiresYear,
+      // Business Metrics
+      clientsPerYear, onboardingTimePre, onboardingTimePost, staffHourlyRate,
+      duplicateRate, resolutionTime, canopyCost, dropboxCost, esignCost,
+      capacityIncrease, revenuePerClient, docHandlingHours, docAdminRate, docRiskBuffer,
+      // Cost Parameters
       crmImplementationCost, annualCrmLicense, devHourlyRate, salesHourlyRate,
-      matchmakerHourlyRate, adminHourlyRate, trainingCostDay, targetConversionRate,
-      targetResponseTime, targetDevHoursWeek, targetTrainingDays,
+      matchmakerHourlyRate, adminHourlyRate, trainingCostDay,
+      // Target Improvements
+      targetConversionRate, targetResponseTime, targetDevHoursWeek, targetTrainingDays,
+      // Current Metrics
+      currentRetentionRate, currentUpsellingRate, currentAdminEfficiency,
+      currentErrorRate, currentSalesProductivity, currentMatchmakerProductivity,
+      // Additional Business Metrics
+      retentionImprovement, upsellingRate, adminEfficiencyRate, errorReductionRate,
+      salesProductivityRate, matchmakerProductivityRate,
+      // Forecasted Improvements
+      onboardingTimeReduction, duplicateRateReduction, resolutionTimeReduction,
+      canopyCostReduction, dropboxCostReduction, esignCostReduction,
+      docHandlingHoursReduction, docRiskBufferReduction,
+      // Implementation
+      implementationType, implementationTimeline,
       savedAt: new Date().toLocaleDateString()
     };
     setSavedScenarios(prev => ({
@@ -118,26 +250,60 @@ function App() {
   const loadSavedScenario = (name) => {
     if (savedScenarios[name]) {
       const saved = savedScenarios[name];
-      setAnnualRevenue(saved.annualRevenue);
-      setMonthlyLeads(saved.monthlyLeads);
-      setCurrentConversionRate(saved.currentConversionRate);
-      setAvgCustomerValue(saved.avgCustomerValue);
-      setCurrentResponseTime(saved.currentResponseTime);
-      setSalesStaff(saved.salesStaff);
-      setMatchmakers(saved.matchmakers);
-      setDevHoursWeek(saved.devHoursWeek);
-      setNewHiresYear(saved.newHiresYear);
-      setCrmImplementationCost(saved.crmImplementationCost);
-      setAnnualCrmLicense(saved.annualCrmLicense);
-      setDevHourlyRate(saved.devHourlyRate);
-      setSalesHourlyRate(saved.salesHourlyRate);
-      setMatchmakerHourlyRate(saved.matchmakerHourlyRate);
-      setAdminHourlyRate(saved.adminHourlyRate);
-      setTrainingCostDay(saved.trainingCostDay);
-      setTargetConversionRate(saved.targetConversionRate);
-      setTargetResponseTime(saved.targetResponseTime);
-      setTargetDevHoursWeek(saved.targetDevHoursWeek);
-      setTargetTrainingDays(saved.targetTrainingDays);
+      // Business Metrics
+      setClientsPerYear(saved.clientsPerYear || 2000);
+      setOnboardingTimePre(saved.onboardingTimePre || 3.0);
+      setOnboardingTimePost(saved.onboardingTimePost || 1.5);
+      setStaffHourlyRate(saved.staffHourlyRate || 50);
+      setDuplicateRate(saved.duplicateRate || 5);
+      setResolutionTime(saved.resolutionTime || 1.5);
+      setCanopyCost(saved.canopyCost || 10000);
+      setDropboxCost(saved.dropboxCost || 3000);
+      setEsignCost(saved.esignCost || 3000);
+      setCapacityIncrease(saved.capacityIncrease || 20);
+      setRevenuePerClient(saved.revenuePerClient || 1500);
+      setDocHandlingHours(saved.docHandlingHours || 300);
+      setDocAdminRate(saved.docAdminRate || 40);
+      setDocRiskBuffer(saved.docRiskBuffer || 5000);
+      // Cost Parameters
+      setCrmImplementationCost(saved.crmImplementationCost || 150000);
+      setAnnualCrmLicense(saved.annualCrmLicense || 60000);
+      setDevHourlyRate(saved.devHourlyRate || 75);
+      setSalesHourlyRate(saved.salesHourlyRate || 35);
+      setMatchmakerHourlyRate(saved.matchmakerHourlyRate || 40);
+      setAdminHourlyRate(saved.adminHourlyRate || 25);
+      setTrainingCostDay(saved.trainingCostDay || 500);
+      // Target Improvements
+      setTargetConversionRate(saved.targetConversionRate || 25);
+      setTargetResponseTime(saved.targetResponseTime || 4);
+      setTargetDevHoursWeek(saved.targetDevHoursWeek || 4);
+      setTargetTrainingDays(saved.targetTrainingDays || 35);
+      // Current Metrics
+      setCurrentRetentionRate(saved.currentRetentionRate || 85);
+      setCurrentUpsellingRate(saved.currentUpsellingRate || 5);
+      setCurrentAdminEfficiency(saved.currentAdminEfficiency || 70);
+      setCurrentErrorRate(saved.currentErrorRate || 3);
+      setCurrentSalesProductivity(saved.currentSalesProductivity || 75);
+      setCurrentMatchmakerProductivity(saved.currentMatchmakerProductivity || 70);
+      // Additional Business Metrics
+      setRetentionImprovement(saved.retentionImprovement || 2);
+      setUpsellingRate(saved.upsellingRate || 8);
+      setAdminEfficiencyRate(saved.adminEfficiencyRate || 3.3);
+      setErrorReductionRate(saved.errorReductionRate || 1);
+      setSalesProductivityRate(saved.salesProductivityRate || 15);
+      setMatchmakerProductivityRate(saved.matchmakerProductivityRate || 12);
+      // Forecasted Improvements
+      setOnboardingTimeReduction(saved.onboardingTimeReduction || 50);
+      setDuplicateRateReduction(saved.duplicateRateReduction || 60);
+      setResolutionTimeReduction(saved.resolutionTimeReduction || 50);
+      setCanopyCostReduction(saved.canopyCostReduction || 80);
+      setDropboxCostReduction(saved.dropboxCostReduction || 100);
+      setEsignCostReduction(saved.esignCostReduction || 100);
+      setDocHandlingHoursReduction(saved.docHandlingHoursReduction || 40);
+      setDocRiskBufferReduction(saved.docRiskBufferReduction || 50);
+      // Implementation
+      setImplementationType(saved.implementationType || 'sugarcrm');
+      setImplementationTimeline(saved.implementationTimeline || 3);
     }
   };
 
@@ -179,131 +345,120 @@ function App() {
   const exportToExcel = () => {
     const results = calculateResults()
     const data = [
-      ['CRM ROI Calculator Results', ''],
+      ['Asterix Global ROI Calculator Results', ''],
       ['Scenario', 'Custom'],
       ['Generated', new Date().toLocaleDateString()],
       ['', ''],
       ['Summary', ''],
-      ['Total Annual Benefits', `$${formatCurrency(results.totalBenefits)}`],
-      ['Total Annual Costs', `$${formatCurrency(results.totalCosts)}`],
-      ['ROI', `${results.roi.toFixed(1)}%`],
-      ['Payback Period', `${results.paybackPeriod.toFixed(1)} months`],
-      ['3-Year NPV', `$${formatCurrency(results.threeYearNPV)}`],
+              ['Labor Efficiency', `$${formatCurrency(results.laborEfficiency)}`],
+        ['Error Reduction', `$${formatCurrency(results.errorReduction)}`],
+        ['Software Consolidation', `$${formatCurrency(results.softwareConsolidation)}`],
+        ['Document Handling & Risk Avoidance', `$${formatCurrency(results.docHandlingBenefit)}`],
+        ['Total Annual Savings', `$${formatCurrency(results.totalAnnualSavings)}`],
+        ['Revenue Enablement', `$${formatCurrency(results.revenueEnablement)}`],
+        ['Total Annual Benefits', `$${formatCurrency(results.totalAnnualBenefits)}`],
+        ['Total Annual Costs', `$${formatCurrency(results.totalAnnualCosts)}`],
+        ['Payback Period', `${results.paybackPeriod.toFixed(1)} months`],
+        ['ROI', `${results.roi.toFixed(1)}%`],
+        ['3-Year NPV', `$${formatCurrency(results.threeYearNPV)}`],
       ['', ''],
-      ['Benefits Breakdown', ''],
-      ['Revenue Uplift', `$${formatCurrency(results.breakdown.revenueUplift.total)}`],
-      ['Cost Savings', `$${formatCurrency(results.breakdown.costSavings.total)}`],
-      ['Productivity Gains', `$${formatCurrency(results.breakdown.productivityGains.total)}`]
+      ['Strategic & Qualitative Benefits', ''],
+      ['- Enhanced client satisfaction and retention', ''],
+      ['- Shorter sales/onboarding cycles', ''],
+      ['- Improved audit/compliance posture', ''],
+      ['- Increased staff retention due to less burnout', ''],
+      ['- Brand elevation via digital maturity', '']
     ]
     
     const ws = XLSX.utils.aoa_to_sheet(data)
     const wb = XLSX.utils.book_new()
     XLSX.utils.book_append_sheet(wb, ws, 'ROI Analysis')
-    XLSX.writeFile(wb, `CRM-ROI-Calculator-${new Date().toISOString().split('T')[0]}.xlsx`)
+    XLSX.writeFile(wb, `Asterix-ROI-Calculator-${new Date().toISOString().split('T')[0]}.xlsx`)
   }
 
   const calculateResults = () => {
-    // Apply scenario multipliers
-    let riskFactor = 1
-    let implementationSuccess = 0.85
+    // Calculate forecasted values based on improvement percentages
+    const forecastedOnboardingTime = onboardingTimePre * (1 - onboardingTimeReduction / 100);
+    const forecastedDuplicateRate = duplicateRate * (1 - duplicateRateReduction / 100);
+    const forecastedResolutionTime = resolutionTime * (1 - resolutionTimeReduction / 100);
+    const forecastedCanopyCost = canopyCost * (1 - canopyCostReduction / 100);
+    const forecastedDropboxCost = dropboxCost * (1 - dropboxCostReduction / 100);
+    const forecastedEsignCost = esignCost * (1 - esignCostReduction / 100);
+    const forecastedDocHandlingHours = docHandlingHours * (1 - docHandlingHoursReduction / 100);
+    const forecastedDocRiskBuffer = docRiskBuffer * (1 - docRiskBufferReduction / 100);
     
-    // Revenue Uplift Calculations
-    const conversionImprovement = Math.max(0, (targetConversionRate - currentConversionRate) / 100)
-    const responseTimeImprovement = Math.max(0, (currentResponseTime - targetResponseTime) * 0.03)
-    const retentionImprovementValue = Math.max(0, retentionImprovement / 100)
-    const upsellingRateValue = Math.max(0, upsellingRate / 100)
-
-    const revenueUplift = {
-      conversion: monthlyLeads * 12 * conversionImprovement * avgCustomerValue * riskFactor,
-      responseTime: annualRevenue * responseTimeImprovement * riskFactor,
-      retention: annualRevenue * retentionImprovementValue * riskFactor,
-      upselling: annualRevenue * upsellingRateValue * riskFactor,
-      total: 0
-    }
-    revenueUplift.total = revenueUplift.conversion + revenueUplift.responseTime + revenueUplift.retention + revenueUplift.upselling
-
-    // Cost Savings Calculations
-    const devTimeSavings = Math.max(0, (devHoursWeek - targetDevHoursWeek) * 52 * devHourlyRate * riskFactor)
-    const trainingCostReduction = Math.max(0, newHiresYear * trainingCostDay * 0.3 * riskFactor)
-    const adminEfficiency = Math.max(0, annualRevenue * (adminEfficiencyRate / 100) * riskFactor)
-    const errorReduction = Math.max(0, annualRevenue * (errorReductionRate / 100) * riskFactor)
-
-    const costSavings = {
-      developer: devTimeSavings,
-      training: trainingCostReduction,
-      admin: adminEfficiency,
-      errorReduction: errorReduction,
-      total: devTimeSavings + trainingCostReduction + adminEfficiency + errorReduction
-    }
-
-    // Productivity Gains
-    const salesProductivity = Math.max(0, salesStaff * salesHourlyRate * 2080 * (salesProductivityRate / 100) * riskFactor)
-    const matchmakerProductivity = Math.max(0, matchmakers * matchmakerHourlyRate * 2080 * (matchmakerProductivityRate / 100) * riskFactor)
-    const reportingTimeSavings = Math.max(0, (salesStaff + matchmakers + 25) * adminHourlyRate * 52 * 2 * riskFactor)
-
-    const productivityGains = {
-      sales: salesProductivity,
-      matchmaker: matchmakerProductivity,
-      reporting: reportingTimeSavings,
-      total: salesProductivity + matchmakerProductivity + reportingTimeSavings
-    }
-
-    // Check if we're at baseline (no improvements)
-    const isAtBaseline = 
-      targetConversionRate === currentConversionRate &&
-      targetResponseTime === currentResponseTime &&
-      targetDevHoursWeek === devHoursWeek &&
-      targetTrainingDays === 0 &&
-      retentionImprovement === 0 &&
-      upsellingRate === 0 &&
-      adminEfficiencyRate === 0 &&
-      errorReductionRate === 0 &&
-      salesProductivityRate === 0 &&
-      matchmakerProductivityRate === 0
-
-    // Calculate total benefits
-    const totalBenefits = isAtBaseline ? 0 : (revenueUplift.total + costSavings.total + productivityGains.total) * implementationSuccess
-
-    // Total Costs
-    const integrationCosts = crmImplementationCost * 0.25
-    const changeManagementCosts = crmImplementationCost * 0.15
-    const totalImplementationCosts = crmImplementationCost + integrationCosts + changeManagementCosts
-    const totalCosts = totalImplementationCosts + annualCrmLicense
-
-    // ROI Calculation
-    const roi = totalBenefits === 0 ? -100 : ((totalBenefits - totalCosts) / totalCosts) * 100
-    const paybackPeriod = totalBenefits === 0 ? Infinity : totalCosts / (totalBenefits / 12)
-
-    // 3-Year Analysis with ramp-up
-    const year1Benefits = totalBenefits * 0.5
-    const year2Benefits = totalBenefits * 0.85
-    const year3Benefits = totalBenefits * 1.0
+    // Labor Efficiency - Time savings from faster onboarding
+    // Calculate hours saved per client, then multiply by hourly rate and number of clients
+    const laborEfficiency = (onboardingTimePre - forecastedOnboardingTime) * staffHourlyRate * clientsPerYear;
     
-    const yearlyAnalysis = [
-      { year: 'Year 1', benefits: year1Benefits, costs: totalCosts, net: year1Benefits - totalCosts },
-      { year: 'Year 2', benefits: year2Benefits, costs: annualCrmLicense, net: year2Benefits - annualCrmLicense },
-      { year: 'Year 3', benefits: year3Benefits, costs: annualCrmLicense, net: year3Benefits - annualCrmLicense }
-    ]
-
-    const threeYearNPV = yearlyAnalysis.reduce((npv, year, index) => {
-      return npv + (year.net / Math.pow(1.1, index + 1))
-    }, 0)
-
+    // Error Reduction - Cost savings from fewer duplicate/rework issues
+    // Calculate the cost of handling duplicates before vs after improvements
+    const currentDuplicateCost = (clientsPerYear * (duplicateRate / 100)) * resolutionTime * staffHourlyRate;
+    const forecastedDuplicateCost = (clientsPerYear * (forecastedDuplicateRate / 100)) * forecastedResolutionTime * staffHourlyRate;
+    const errorReduction = currentDuplicateCost - forecastedDuplicateCost;
+    
+    // Software Consolidation - Direct cost savings from replacing multiple tools
+    const softwareConsolidation = (canopyCost - forecastedCanopyCost) + (dropboxCost - forecastedDropboxCost) + (esignCost - forecastedEsignCost);
+    
+    // Revenue Enablement - Additional revenue from increased capacity
+    const revenueEnablement = (clientsPerYear * (capacityIncrease / 100)) * revenuePerClient;
+    
+    // Document Handling & Risk Avoidance - Savings from better document management
+    // Separate the two components for clarity
+    const docHandlingSavings = (docHandlingHours - forecastedDocHandlingHours) * docAdminRate;
+    const riskBufferSavings = docRiskBuffer - forecastedDocRiskBuffer;
+    const docHandlingBenefit = docHandlingSavings + riskBufferSavings;
+    
+    // Total Annual Benefits (savings + new revenue)
+    const totalAnnualBenefits = laborEfficiency + errorReduction + softwareConsolidation + docHandlingBenefit + revenueEnablement;
+    
+    // Total Annual Savings (cost reductions only, excluding new revenue)
+    const totalAnnualSavings = laborEfficiency + errorReduction + softwareConsolidation + docHandlingBenefit;
+    
+    // Implementation Costs
+    const implementationCost = implementationType === 'sugarcrm' ? crmImplementationCost : 150000;
+    const annualLicenseCost = implementationType === 'sugarcrm' ? annualCrmLicense : 75000;
+    
+    // Total Annual Costs
+    const totalAnnualCosts = annualLicenseCost;
+    
+    // Payback Period (months) - using implementation cost as investment
+    // Only use cost savings for payback calculation, not new revenue
+    const paybackPeriod = totalAnnualSavings > 0 ? (implementationCost / totalAnnualSavings) * 12 : 0;
+    
+    // ROI % - (Annual Benefits - Annual Costs) / Implementation Cost
+    const roi = implementationCost > 0 ? ((totalAnnualBenefits - totalAnnualCosts) / implementationCost) * 100 : 0;
+    
+    // 3-Year NPV calculation
+    const discountRate = 0.1; // 10% discount rate
+    const annualNetBenefit = totalAnnualBenefits - totalAnnualCosts;
+    const year1NPV = annualNetBenefit / Math.pow(1 + discountRate, 1);
+    const year2NPV = annualNetBenefit / Math.pow(1 + discountRate, 2);
+    const year3NPV = annualNetBenefit / Math.pow(1 + discountRate, 3);
+    const threeYearNPV = year1NPV + year2NPV + year3NPV - implementationCost;
+    
     return {
-      totalBenefits,
-      totalCosts,
-      totalImplementationCosts,
-      roi,
+      laborEfficiency,
+      errorReduction,
+      softwareConsolidation,
+      revenueEnablement,
+      docHandlingBenefit,
+      totalAnnualSavings,
+      totalAnnualBenefits,
+      totalAnnualCosts,
       paybackPeriod,
+      roi,
       threeYearNPV,
-      implementationSuccess,
-      breakdown: {
-        revenueUplift,
-        costSavings,
-        productivityGains
-      },
-      yearlyAnalysis
-    }
+      // Add forecasted values for display
+      forecastedOnboardingTime,
+      forecastedDuplicateRate,
+      forecastedResolutionTime,
+      forecastedCanopyCost,
+      forecastedDropboxCost,
+      forecastedEsignCost,
+      forecastedDocHandlingHours,
+      forecastedDocRiskBuffer
+    };
   }
 
   const results = calculateResults()
@@ -318,7 +473,21 @@ function App() {
   const getROIColor = () => {
     if (results.roi > 1000) return '#FF6B6B'
     if (results.roi > 500) return '#FFB347'
-    return '#7A39ED'
+    return '#3DF08A'
+  }
+
+  // Helper function to get color for improvement indicators
+  const getImprovementColor = (metric, baselineValue, forecastedValue) => {
+    // For most metrics, a reduction is good (green), increase is bad (red)
+    // For capacity gain, an increase is good (green)
+    
+    if (metric === 'Capacity Gain (%)') {
+      // For capacity gain, positive is good
+      return forecastedValue > baselineValue ? '#3DF08A' : '#FF6B6B'
+    }
+    
+    // For all other metrics, reduction is good (green), increase is bad (red)
+    return forecastedValue < baselineValue ? '#3DF08A' : '#FF6B6B'
   }
 
   const credibilityWarning = getCredibilityWarning()
@@ -377,28 +546,88 @@ function App() {
   const copyScenarioVariables = (fromScenario) => {
     if (savedScenarios[fromScenario]) {
       const saved = savedScenarios[fromScenario];
-      setAnnualRevenue(saved.annualRevenue);
-      setMonthlyLeads(saved.monthlyLeads);
-      setCurrentConversionRate(saved.currentConversionRate);
-      setAvgCustomerValue(saved.avgCustomerValue);
-      setCurrentResponseTime(saved.currentResponseTime);
-      setSalesStaff(saved.salesStaff);
-      setMatchmakers(saved.matchmakers);
-      setDevHoursWeek(saved.devHoursWeek);
-      setNewHiresYear(saved.newHiresYear);
-      setCrmImplementationCost(saved.crmImplementationCost);
-      setAnnualCrmLicense(saved.annualCrmLicense);
-      setDevHourlyRate(saved.devHourlyRate);
-      setSalesHourlyRate(saved.salesHourlyRate);
-      setMatchmakerHourlyRate(saved.matchmakerHourlyRate);
-      setAdminHourlyRate(saved.adminHourlyRate);
-      setTrainingCostDay(saved.trainingCostDay);
-      setTargetConversionRate(saved.targetConversionRate);
-      setTargetResponseTime(saved.targetResponseTime);
-      setTargetDevHoursWeek(saved.targetDevHoursWeek);
-      setTargetTrainingDays(saved.targetTrainingDays);
+      // Business Metrics
+      setClientsPerYear(saved.clientsPerYear || 2000);
+      setOnboardingTimePre(saved.onboardingTimePre || 3.0);
+      setOnboardingTimePost(saved.onboardingTimePost || 1.5);
+      setStaffHourlyRate(saved.staffHourlyRate || 50);
+      setDuplicateRate(saved.duplicateRate || 5);
+      setResolutionTime(saved.resolutionTime || 1.5);
+      setCanopyCost(saved.canopyCost || 10000);
+      setDropboxCost(saved.dropboxCost || 3000);
+      setEsignCost(saved.esignCost || 3000);
+      setCapacityIncrease(saved.capacityIncrease || 20);
+      setRevenuePerClient(saved.revenuePerClient || 1500);
+      setDocHandlingHours(saved.docHandlingHours || 300);
+      setDocAdminRate(saved.docAdminRate || 40);
+      setDocRiskBuffer(saved.docRiskBuffer || 5000);
+      // Cost Parameters
+      setCrmImplementationCost(saved.crmImplementationCost || 150000);
+      setAnnualCrmLicense(saved.annualCrmLicense || 60000);
+      setDevHourlyRate(saved.devHourlyRate || 75);
+      setSalesHourlyRate(saved.salesHourlyRate || 35);
+      setMatchmakerHourlyRate(saved.matchmakerHourlyRate || 40);
+      setAdminHourlyRate(saved.adminHourlyRate || 25);
+      setTrainingCostDay(saved.trainingCostDay || 500);
+      // Target Improvements
+      setTargetConversionRate(saved.targetConversionRate || 25);
+      setTargetResponseTime(saved.targetResponseTime || 4);
+      setTargetDevHoursWeek(saved.targetDevHoursWeek || 4);
+      setTargetTrainingDays(saved.targetTrainingDays || 35);
+      // Current Metrics
+      setCurrentRetentionRate(saved.currentRetentionRate || 85);
+      setCurrentUpsellingRate(saved.currentUpsellingRate || 5);
+      setCurrentAdminEfficiency(saved.currentAdminEfficiency || 70);
+      setCurrentErrorRate(saved.currentErrorRate || 3);
+      setCurrentSalesProductivity(saved.currentSalesProductivity || 75);
+      setCurrentMatchmakerProductivity(saved.currentMatchmakerProductivity || 70);
+      // Additional Business Metrics
+      setRetentionImprovement(saved.retentionImprovement || 2);
+      setUpsellingRate(saved.upsellingRate || 8);
+      setAdminEfficiencyRate(saved.adminEfficiencyRate || 3.3);
+      setErrorReductionRate(saved.errorReductionRate || 1);
+      setSalesProductivityRate(saved.salesProductivityRate || 15);
+      setMatchmakerProductivityRate(saved.matchmakerProductivityRate || 12);
+      // Forecasted Improvements
+      setOnboardingTimeReduction(saved.onboardingTimeReduction || 50);
+      setDuplicateRateReduction(saved.duplicateRateReduction || 60);
+      setResolutionTimeReduction(saved.resolutionTimeReduction || 50);
+      setCanopyCostReduction(saved.canopyCostReduction || 80);
+      setDropboxCostReduction(saved.dropboxCostReduction || 100);
+      setEsignCostReduction(saved.esignCostReduction || 100);
+      setDocHandlingHoursReduction(saved.docHandlingHoursReduction || 40);
+      setDocRiskBufferReduction(saved.docRiskBufferReduction || 50);
+      // Implementation
+      setImplementationType(saved.implementationType || 'sugarcrm');
+      setImplementationTimeline(saved.implementationTimeline || 3);
     }
   };
+
+  const [expandedSections, setExpandedSections] = useState({
+    clientsPerYear: false,
+    capacityIncrease: false,
+    revenuePerClient: false,
+    staffHourlyRate: false,
+    onboardingTimePre: false,
+    onboardingTimePost: false,
+    docHandlingHours: false,
+    docAdminRate: false,
+    duplicateRate: false,
+    resolutionTime: false,
+    docRiskBuffer: false,
+    canopyCost: false,
+    dropboxCost: false,
+    esignCost: false,
+    // Forecasted improvements
+    onboardingTimeReduction: false,
+    duplicateRateReduction: false,
+    resolutionTimeReduction: false,
+    canopyCostReduction: false,
+    dropboxCostReduction: false,
+    esignCostReduction: false,
+    docHandlingHoursReduction: false,
+    docRiskBufferReduction: false
+  });
 
   return (
     <div className="min-h-screen bg-white" id="calculator-content">
@@ -411,19 +640,20 @@ function App() {
               <span className="text-[#ACACAC] text-sm">Prepared by</span>
               <img src={fayeLogo} alt="Faye" className="h-5" />
             </div>
-            {/* IJL logo center */}
-            <div className="flex-1 flex justify-center">
-              <img src={ijlLogo} alt="It's Just Lunch" style={{height: '109px'}} />
+            {/* Asterix Global branding center */}
+            <div className="flex-1 flex flex-col items-center">
+              <img src={asterixLogo} alt="Asterix Global Services" className="h-10 mb-1" />
+              <h1 className="text-2xl font-bold" style={{color: '#168CA6'}}>Asterix Global Services</h1>
             </div>
             {/* Spacer right */}
             <div style={{width: '80px'}}></div>
           </div>
           <div className="flex items-center justify-center gap-2 mb-1">
-            <Calculator className="h-5 w-5" style={{color: '#38003C'}} />
-            <h1 className="text-2xl font-bold" style={{color: '#38003C'}}>CRM Decision Assistant</h1>
+            <Calculator className="h-5 w-5" style={{color: '#168CA6'}} />
+            <h2 className="text-xl font-bold" style={{color: '#168CA6'}}>Client Portal ROI Calculator</h2>
           </div>
-          <p className="text-base text-[#16815A] mb-0">Calculate the return on investment for upgrading to SugarCRM</p>
-          <p className="text-xs text-[#ACACAC]">Updated for 2025 centralized business model with expert panel feedback</p>
+          <p className="text-base text-[#16815A] mb-0">Calculate the return on investment for a digital intake portal for insurance/reinsurance onboarding</p>
+          <p className="text-xs text-[#ACACAC]">For Asterix Global Services, Inc. | Addison, Texas</p>
         </div>
 
         {/* Main Content Grid */}
@@ -527,452 +757,675 @@ function App() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="pt-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <Label htmlFor="annualRevenue">Annual Revenue: ${(annualRevenue / 1000000).toFixed(0)}M</Label>
-                    <Slider
-                      id="annualRevenue"
-                      min={10000000}
-                      max={50000000}
-                      step={1000000}
-                      value={[annualRevenue]}
-                      onValueChange={(value) => setAnnualRevenue(value[0])}
-                      className="mt-2"
-                    />
-                    <div className="flex justify-between text-xs text-gray-500 mt-1">
-                      <span>$10M</span>
-                      <span>Centralized operations</span>
-                      <span>$50M</span>
+                {/* Revenue Metrics */}
+                <div className="mb-8">
+                  <h3 className="text-lg font-semibold mb-4" style={{color: '#16815A'}}>Revenue Metrics</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <Label htmlFor="clientsPerYear" className="mb-2">
+                        Clients Onboarded per Year (Baseline)
+                        <button 
+                          className="ml-1 text-xs text-gray-400 hover:text-gray-600 focus:outline-none"
+                          onClick={() => setExpandedSections(prev => ({...prev, clientsPerYear: !prev.clientsPerYear}))}
+                        >
+                          {expandedSections.clientsPerYear ? '−' : '+'}
+                        </button>
+                      </Label>
+                      {expandedSections.clientsPerYear && (
+                        <div className="mb-2 p-2 bg-gray-50 rounded text-xs text-gray-600">
+                          Your current annual client onboarding volume. This baseline number is used to calculate the revenue impact of increased capacity.
+                        </div>
+                      )}
+                      <div className="relative">
+                        <Slider
+                          id="clientsPerYear"
+                          value={[clientsPerYear]}
+                          onValueChange={(value) => setClientsPerYear(value[0])}
+                          max={5000}
+                          min={1000}
+                          step={100}
+                        />
+                        <p className='text-xs text-gray-500 mt-1'>{clientsPerYear.toLocaleString()} clients/year</p>
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="revenuePerClient" className="mb-2">
+                        Avg. Annual Revenue per Client (Baseline)
+                        <button 
+                          className="ml-1 text-xs text-gray-400 hover:text-gray-600 focus:outline-none"
+                          onClick={() => setExpandedSections(prev => ({...prev, revenuePerClient: !prev.revenuePerClient}))}
+                        >
+                          {expandedSections.revenuePerClient ? '−' : '+'}
+                        </button>
+                      </Label>
+                      {expandedSections.revenuePerClient && (
+                        <div className="mb-2 p-2 bg-gray-50 rounded text-xs text-gray-600">
+                          Your current average annual revenue generated per client. This recurring revenue is used to calculate the additional annual revenue from increased capacity and improved client satisfaction.
+                        </div>
+                      )}
+                      <div className="relative">
+                        <Slider
+                          id="revenuePerClient"
+                          value={[revenuePerClient]}
+                          onValueChange={(value) => setRevenuePerClient(value[0])}
+                          max={10000}
+                          min={1000}
+                          step={100}
+                        />
+                        <p className='text-xs text-gray-500 mt-1'>${revenuePerClient.toLocaleString()}</p>
+                      </div>
                     </div>
                   </div>
+                </div>
 
-                  <div>
-                    <Label htmlFor="monthlyLeads">Monthly Leads: {monthlyLeads}</Label>
-                    <Slider
-                      id="monthlyLeads"
-                      min={200}
-                      max={2000}
-                      step={50}
-                      value={[monthlyLeads]}
-                      onValueChange={(value) => setMonthlyLeads(value[0])}
-                      className="mt-2"
-                    />
-                    <div className="flex justify-between text-xs text-gray-500 mt-1">
-                      <span>200</span>
-                      <span>10K annual ÷ 12 months</span>
-                      <span>2,000</span>
+                {/* Labor Efficiency Metrics */}
+                <div className="mb-8">
+                  <h3 className="text-lg font-semibold mb-4" style={{color: '#16815A'}}>Labor Efficiency Metrics</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <Label htmlFor="staffHourlyRate" className="mb-2">
+                        Avg. Staff Cost per Hour (Baseline)
+                        <button 
+                          className="ml-1 text-xs text-gray-400 hover:text-gray-600 focus:outline-none"
+                          onClick={() => setExpandedSections(prev => ({...prev, staffHourlyRate: !prev.staffHourlyRate}))}
+                        >
+                          {expandedSections.staffHourlyRate ? '−' : '+'}
+                        </button>
+                      </Label>
+                      {expandedSections.staffHourlyRate && (
+                        <div className="mb-2 p-2 bg-gray-50 rounded text-xs text-gray-600">
+                          Your current average hourly cost for staff involved in onboarding and document management. This is used to calculate labor savings from reduced manual work.
+                        </div>
+                      )}
+                      <div className="relative">
+                        <Slider
+                          id="staffHourlyRate"
+                          value={[staffHourlyRate]}
+                          onValueChange={(value) => setStaffHourlyRate(value[0])}
+                          max={75}
+                          min={35}
+                          step={1}
+                        />
+                        <p className='text-xs text-gray-500 mt-1'>${staffHourlyRate.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} per hour</p>
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="onboardingTimePre" className="mb-2">
+                        Onboarding Time - Current (hours)
+                        <button 
+                          className="ml-1 text-xs text-gray-400 hover:text-gray-600 focus:outline-none"
+                          onClick={() => setExpandedSections(prev => ({...prev, onboardingTimePre: !prev.onboardingTimePre}))}
+                        >
+                          {expandedSections.onboardingTimePre ? '−' : '+'}
+                        </button>
+                      </Label>
+                      {expandedSections.onboardingTimePre && (
+                        <div className="mb-2 p-2 bg-gray-50 rounded text-xs text-gray-600">
+                          The average time currently spent onboarding each client, including manual document collection, follow-ups, and administrative tasks.
+                        </div>
+                      )}
+                      <div className="relative">
+                        <Slider
+                          id="onboardingTimePre"
+                          value={[onboardingTimePre]}
+                          onValueChange={(value) => setOnboardingTimePre(value[0])}
+                          max={4}
+                          min={0.5}
+                          step={0.01}
+                        />
+                        <p className='text-xs text-gray-500 mt-1'>{onboardingTimePre.toFixed(2)} hours</p>
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="onboardingTimePost" className="mb-2">
+                        Onboarding Time - With Portal (hours)
+                        <button 
+                          className="ml-1 text-xs text-gray-400 hover:text-gray-600 focus:outline-none"
+                          onClick={() => setExpandedSections(prev => ({...prev, onboardingTimePost: !prev.onboardingTimePost}))}
+                        >
+                          {expandedSections.onboardingTimePost ? '−' : '+'}
+                        </button>
+                      </Label>
+                      {expandedSections.onboardingTimePost && (
+                        <div className="mb-2 p-2 bg-gray-50 rounded text-xs text-gray-600">
+                          The projected time to onboard each client with the digital portal, accounting for automated workflows, self-service document uploads, and reduced manual intervention.
+                        </div>
+                      )}
+                      <div className="relative">
+                        <Slider
+                          id="onboardingTimePost"
+                          value={[onboardingTimePost]}
+                          onValueChange={(value) => setOnboardingTimePost(value[0])}
+                          max={4}
+                          min={0.5}
+                          step={0.01}
+                        />
+                        <p className='text-xs text-gray-500 mt-1'>{onboardingTimePost.toFixed(2)} hours</p>
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="docHandlingHours" className="mb-2">
+                        Total Document Handling Hours - Current (annual)
+                        <button 
+                          className="ml-1 text-xs text-gray-400 hover:text-gray-600 focus:outline-none"
+                          onClick={() => setExpandedSections(prev => ({...prev, docHandlingHours: !prev.docHandlingHours}))}
+                        >
+                          {expandedSections.docHandlingHours ? '−' : '+'}
+                        </button>
+                      </Label>
+                      {expandedSections.docHandlingHours && (
+                        <div className="mb-2 p-2 bg-gray-50 rounded text-xs text-gray-600">
+                          Total annual hours across all staff currently spent managing documents, signatures, follow-ups, and administrative tasks related to client onboarding and maintenance. This is the aggregate time spent by your entire team.
+                        </div>
+                      )}
+                      <div className="relative">
+                        <Slider
+                          id="docHandlingHours"
+                          value={[docHandlingHours]}
+                          onValueChange={(value) => setDocHandlingHours(value[0])}
+                          max={1000}
+                          min={100}
+                          step={10}
+                        />
+                        <p className='text-xs text-gray-500 mt-1'>{docHandlingHours.toLocaleString()} hours</p>
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="docAdminRate" className="mb-2">
+                        Admin Rate for Document Handling (Baseline)
+                        <button 
+                          className="ml-1 text-xs text-gray-400 hover:text-gray-600 focus:outline-none"
+                          onClick={() => setExpandedSections(prev => ({...prev, docAdminRate: !prev.docAdminRate}))}
+                        >
+                          {expandedSections.docAdminRate ? '−' : '+'}
+                        </button>
+                      </Label>
+                      {expandedSections.docAdminRate && (
+                        <div className="mb-2 p-2 bg-gray-50 rounded text-xs text-gray-600">
+                          The hourly rate for administrative staff who handle document management tasks. This is used to calculate the cost savings from reduced manual document work.
+                        </div>
+                      )}
+                      <div className="relative">
+                        <Slider
+                          id="docAdminRate"
+                          value={[docAdminRate]}
+                          onValueChange={(value) => setDocAdminRate(value[0])}
+                          max={75}
+                          min={25}
+                          step={1}
+                        />
+                        <p className='text-xs text-gray-500 mt-1'>${docAdminRate.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} per hour</p>
+                      </div>
                     </div>
                   </div>
+                </div>
 
-                  <div>
-                    <Label htmlFor="currentConversionRate">Current Conversion Rate: {currentConversionRate}%</Label>
-                    <Slider
-                      id="currentConversionRate"
-                      min={10}
-                      max={40}
-                      step={1}
-                      value={[currentConversionRate]}
-                      onValueChange={(value) => setCurrentConversionRate(value[0])}
-                      className="mt-2"
-                    />
-                    <div className="flex justify-between text-xs text-gray-500 mt-1">
-                      <span>10%</span>
-                      <span>8K clients ÷ 10K leads</span>
-                      <span>40%</span>
+                {/* Error Reduction Metrics */}
+                <div className="mb-8">
+                  <h3 className="text-lg font-semibold mb-4" style={{color: '#16815A'}}>Error Reduction Metrics</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <Label htmlFor="duplicateRate" className="mb-2">
+                        Duplicate/Rework Rate - Current (%)
+                        <button 
+                          className="ml-1 text-xs text-gray-400 hover:text-gray-600 focus:outline-none"
+                          onClick={() => setExpandedSections(prev => ({...prev, duplicateRate: !prev.duplicateRate}))}
+                        >
+                          {expandedSections.duplicateRate ? '−' : '+'}
+                        </button>
+                      </Label>
+                      {expandedSections.duplicateRate && (
+                        <div className="mb-2 p-2 bg-gray-50 rounded text-xs text-gray-600">
+                          The current percentage of onboarding processes that require rework due to missing documents, incorrect information, or duplicate submissions. This impacts both time and costs.
+                        </div>
+                      )}
+                      <div className="relative">
+                        <Slider
+                          id="duplicateRate"
+                          value={[duplicateRate]}
+                          onValueChange={(value) => setDuplicateRate(value[0])}
+                          max={10}
+                          min={2}
+                          step={0.1}
+                        />
+                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400">%</span>
+                        <p className='text-xs text-gray-500 mt-1'>{duplicateRate.toFixed(2)}%</p>
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="resolutionTime" className="mb-2">
+                        Resolution Time per Issue - Current (hours)
+                        <button 
+                          className="ml-1 text-xs text-gray-400 hover:text-gray-600 focus:outline-none"
+                          onClick={() => setExpandedSections(prev => ({...prev, resolutionTime: !prev.resolutionTime}))}
+                        >
+                          {expandedSections.resolutionTime ? '−' : '+'}
+                        </button>
+                      </Label>
+                      {expandedSections.resolutionTime && (
+                        <div className="mb-2 p-2 bg-gray-50 rounded text-xs text-gray-600">
+                          The average time spent resolving issues like missing documents, incorrect submissions, or client follow-ups. This includes communication time and administrative overhead.
+                        </div>
+                      )}
+                      <div className="relative">
+                        <Slider
+                          id="resolutionTime"
+                          value={[resolutionTime]}
+                          onValueChange={(value) => setResolutionTime(value[0])}
+                          max={3}
+                          min={0.5}
+                          step={0.01}
+                        />
+                        <p className='text-xs text-gray-500 mt-1'>{resolutionTime.toFixed(2)} hours</p>
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="docRiskBuffer" className="mb-2">
+                        Document Risk Buffer - Current (annual)
+                        <button 
+                          className="ml-1 text-xs text-gray-400 hover:text-gray-600 focus:outline-none"
+                          onClick={() => setExpandedSections(prev => ({...prev, docRiskBuffer: !prev.docRiskBuffer}))}
+                        >
+                          {expandedSections.docRiskBuffer ? '−' : '+'}
+                        </button>
+                      </Label>
+                      {expandedSections.docRiskBuffer && (
+                        <div className="mb-2 p-2 bg-gray-50 rounded text-xs text-gray-600">
+                          The annual cost buffer you currently maintain for document-related risks, including compliance issues, lost documents, audit findings, and potential legal costs from manual processes.
+                        </div>
+                      )}
+                      <div className="relative">
+                        <Slider
+                          id="docRiskBuffer"
+                          value={[docRiskBuffer]}
+                          onValueChange={(value) => setDocRiskBuffer(value[0])}
+                          max={50000}
+                          min={5000}
+                          step={1000}
+                        />
+                        <p className='text-xs text-gray-500 mt-1'>${docRiskBuffer.toLocaleString()}</p>
+                      </div>
                     </div>
                   </div>
+                </div>
 
-                  <div>
-                    <Label htmlFor="avgCustomerValue">Average Customer Value ($)</Label>
-                    <Input
-                      id="avgCustomerValue"
-                      type="number"
-                      value={avgCustomerValue}
-                      onChange={(e) => setAvgCustomerValue(Number(e.target.value))}
-                      className="border-purple-200 focus:border-purple-400"
-                    />
-                    <span className="text-xs text-gray-500">Research: $2.5K-$3.5K</span>
-                  </div>
+                {/* Current Subscription Costs */}
+                <div className="mb-8">
+                  <h3 className="text-lg font-semibold mb-4" style={{color: '#16815A'}}>Current Subscription Costs (Annual)</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <Label htmlFor="canopyCost" className="mb-2">
+                        Canopy Subscription Cost
+                        <button 
+                          className="ml-1 text-xs text-gray-400 hover:text-gray-600 focus:outline-none"
+                          onClick={() => setExpandedSections(prev => ({...prev, canopyCost: !prev.canopyCost}))}
+                        >
+                          {expandedSections.canopyCost ? '−' : '+'}
+                        </button>
+                      </Label>
+                      {expandedSections.canopyCost && (
+                        <div className="mb-2 p-2 bg-gray-50 rounded text-xs text-gray-600">
+                          Your current annual cost for Canopy or similar practice management software. This will be replaced or reduced by the new portal solution.
+                        </div>
+                      )}
+                      <div className="relative">
+                        <Slider
+                          id="canopyCost"
+                          value={[canopyCost]}
+                          onValueChange={(value) => setCanopyCost(value[0])}
+                          max={20000}
+                          min={5000}
+                          step={1000}
+                        />
+                        <p className='text-xs text-gray-500 mt-1'>${canopyCost.toLocaleString()}</p>
+                      </div>
+                    </div>
 
-                  <div>
-                    <Label htmlFor="currentResponseTime">Current Response Time (hours)</Label>
-                    <Input
-                      id="currentResponseTime"
-                      type="number"
-                      step="0.5"
-                      value={currentResponseTime}
-                      onChange={(e) => setCurrentResponseTime(Number(e.target.value))}
-                      className="border-purple-200 focus:border-purple-400"
-                    />
-                  </div>
+                    <div>
+                      <Label htmlFor="dropboxCost" className="mb-2">
+                        Dropbox Cost
+                        <button 
+                          className="ml-1 text-xs text-gray-400 hover:text-gray-600 focus:outline-none"
+                          onClick={() => setExpandedSections(prev => ({...prev, dropboxCost: !prev.dropboxCost}))}
+                        >
+                          {expandedSections.dropboxCost ? '−' : '+'}
+                        </button>
+                      </Label>
+                      {expandedSections.dropboxCost && (
+                        <div className="mb-2 p-2 bg-gray-50 rounded text-xs text-gray-600">
+                          Your current annual cost for Dropbox or similar file storage/sharing services. The portal will provide integrated document management capabilities.
+                        </div>
+                      )}
+                      <div className="relative">
+                        <Slider
+                          id="dropboxCost"
+                          value={[dropboxCost]}
+                          onValueChange={(value) => setDropboxCost(value[0])}
+                          max={5000}
+                          min={1000}
+                          step={1000}
+                        />
+                        <p className='text-xs text-gray-500 mt-1'>${dropboxCost.toLocaleString()}</p>
+                      </div>
+                    </div>
 
-                  <div>
-                    <Label htmlFor="salesStaff">Sales Staff Count</Label>
-                    <Input
-                      id="salesStaff"
-                      type="number"
-                      value={salesStaff}
-                      onChange={(e) => setSalesStaff(Number(e.target.value))}
-                      className="border-purple-200 focus:border-purple-400"
-                    />
-                    <span className="text-xs text-gray-500">Centralized team</span>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="matchmakers">Matchmaker Count</Label>
-                    <Input
-                      id="matchmakers"
-                      type="number"
-                      value={matchmakers}
-                      onChange={(e) => setMatchmakers(Number(e.target.value))}
-                      className="border-purple-200 focus:border-purple-400"
-                    />
-                    <span className="text-xs text-gray-500">Centralized team</span>
+                    <div>
+                      <Label htmlFor="esignCost" className="mb-2">
+                        DocuSign/e-sign Cost
+                        <button 
+                          className="ml-1 text-xs text-gray-400 hover:text-gray-600 focus:outline-none"
+                          onClick={() => setExpandedSections(prev => ({...prev, esignCost: !prev.esignCost}))}
+                        >
+                          {expandedSections.esignCost ? '−' : '+'}
+                        </button>
+                      </Label>
+                      {expandedSections.esignCost && (
+                        <div className="mb-2 p-2 bg-gray-50 rounded text-xs text-gray-600">
+                          Your current annual cost for DocuSign or similar electronic signature services. The portal will include integrated e-signature capabilities.
+                        </div>
+                      )}
+                      <div className="relative">
+                        <Slider
+                          id="esignCost"
+                          value={[esignCost]}
+                          onValueChange={(value) => setEsignCost(value[0])}
+                          max={5000}
+                          min={1000}
+                          step={1000}
+                        />
+                        <p className='text-xs text-gray-500 mt-1'>${esignCost.toLocaleString()}</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Expected Improvements */}
-            <Card className="border-2" style={{borderColor: '#7A39ED', marginBottom: '12px'}}>
-              <CardHeader className="pb-4 pt-6" style={{backgroundColor: '#7A39ED', marginTop: '-1px', borderTopLeftRadius: '0.5rem', borderTopRightRadius: '0.5rem'}}>
-                <CardTitle className="text-white">Expected Improvements</CardTitle>
+            {/* Forecasted Improvements */}
+            <Card className="border-2" style={{borderColor: '#FFB347'}}>
+              <CardHeader className="pb-4 pt-6" style={{backgroundColor: '#FFB347', marginTop: '-1px', borderTopLeftRadius: '0.5rem', borderTopRightRadius: '0.5rem'}}>
+                <CardTitle className="text-white">Forecasted Improvements</CardTitle>
                 <CardDescription className="text-white/80">
-                  Set your target improvement metrics
+                  Specify expected improvements with the new portal solution
                 </CardDescription>
               </CardHeader>
               <CardContent className="pt-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <Label htmlFor="targetConversionRate" className="flex items-center gap-2">
-                      Conversion Rate: {currentConversionRate}% → {targetConversionRate}%
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger>
-                            <HelpCircle className="h-4 w-4 text-gray-400" />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Expected 10-15% conversion rate improvement through structured follow-ups and better lead management</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </Label>
-                    <Slider
-                      id="targetConversionRate"
-                      min={currentConversionRate}
-                      max={40}
-                      step={0.5}
-                      value={[targetConversionRate]}
-                      onValueChange={(value) => setTargetConversionRate(value[0])}
-                      className="mt-2"
-                    />
-                  </div>
+                {/* Process Efficiency Improvements */}
+                <div className="mb-8">
+                  <h3 className="text-lg font-semibold mb-4" style={{color: '#FFB347'}}>Process Efficiency Improvements</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <Label htmlFor="onboardingTimeReduction" className="mb-2">
+                        Onboarding Time Reduction (%)
+                        <button 
+                          className="ml-1 text-xs text-gray-400 hover:text-gray-600 focus:outline-none"
+                          onClick={() => setExpandedSections(prev => ({...prev, onboardingTimeReduction: !prev.onboardingTimeReduction}))}
+                        >
+                          {expandedSections.onboardingTimeReduction ? '−' : '+'}
+                        </button>
+                      </Label>
+                      {expandedSections.onboardingTimeReduction && (
+                        <div className="mb-2 p-2 bg-gray-50 rounded text-xs text-gray-600">
+                          Expected percentage reduction in onboarding time per client with the new portal. This drives labor efficiency savings.
+                        </div>
+                      )}
+                      <div className="relative">
+                        <Slider
+                          id="onboardingTimeReduction"
+                          value={[onboardingTimeReduction]}
+                          onValueChange={(value) => setOnboardingTimeReduction(value[0])}
+                          max={80}
+                          min={0}
+                          step={5}
+                        />
+                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400">%</span>
+                        <p className='text-xs text-gray-500 mt-1'>{onboardingTimeReduction}% reduction (from {onboardingTimePre.toFixed(1)}h to {results.forecastedOnboardingTime?.toFixed(1)}h)</p>
+                      </div>
+                    </div>
 
-                  <div>
-                    <Label htmlFor="targetResponseTime" className="flex items-center gap-2">
-                      Response Time: {currentResponseTime} → {targetResponseTime} hours
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger>
-                            <HelpCircle className="h-4 w-4 text-gray-400" />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Target 50% reduction in response time to boost close rates and improve client experience</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </Label>
-                    <Slider
-                      id="targetResponseTime"
-                      min={1}
-                      max={currentResponseTime}
-                      step={0.5}
-                      value={[targetResponseTime]}
-                      onValueChange={(value) => setTargetResponseTime(value[0])}
-                      className="mt-2"
-                    />
-                  </div>
+                    <div>
+                      <Label htmlFor="duplicateRateReduction" className="mb-2">
+                        Duplicate/Rework Rate Reduction (%)
+                        <button 
+                          className="ml-1 text-xs text-gray-400 hover:text-gray-600 focus:outline-none"
+                          onClick={() => setExpandedSections(prev => ({...prev, duplicateRateReduction: !prev.duplicateRateReduction}))}
+                        >
+                          {expandedSections.duplicateRateReduction ? '−' : '+'}
+                        </button>
+                      </Label>
+                      {expandedSections.duplicateRateReduction && (
+                        <div className="mb-2 p-2 bg-gray-50 rounded text-xs text-gray-600">
+                          Expected percentage reduction in duplicate submissions and rework due to better document validation and workflow automation.
+                        </div>
+                      )}
+                      <div className="relative">
+                        <Slider
+                          id="duplicateRateReduction"
+                          value={[duplicateRateReduction]}
+                          onValueChange={(value) => setDuplicateRateReduction(value[0])}
+                          max={90}
+                          min={0}
+                          step={5}
+                        />
+                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400">%</span>
+                        <p className='text-xs text-gray-500 mt-1'>{duplicateRateReduction}% reduction (from {duplicateRate.toFixed(1)}% to {results.forecastedDuplicateRate?.toFixed(1)}%)</p>
+                      </div>
+                    </div>
 
-                  <div>
-                    <Label htmlFor="currentRetentionRate" className="flex items-center gap-2">
-                      Current Retention Rate: {currentRetentionRate}%
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger>
-                            <HelpCircle className="h-4 w-4 text-gray-400" />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Current client retention rate before CRM improvements</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </Label>
+                    <div>
+                      <Label htmlFor="resolutionTimeReduction" className="mb-2">
+                        Issue Resolution Time Reduction (%)
+                        <button 
+                          className="ml-1 text-xs text-gray-400 hover:text-gray-600 focus:outline-none"
+                          onClick={() => setExpandedSections(prev => ({...prev, resolutionTimeReduction: !prev.resolutionTimeReduction}))}
+                        >
+                          {expandedSections.resolutionTimeReduction ? '−' : '+'}
+                        </button>
+                      </Label>
+                      {expandedSections.resolutionTimeReduction && (
+                        <div className="mb-2 p-2 bg-gray-50 rounded text-xs text-gray-600">
+                          Expected percentage reduction in time spent resolving issues due to better document management and automated workflows.
+                        </div>
+                      )}
+                      <div className="relative">
+                        <Slider
+                          id="resolutionTimeReduction"
+                          value={[resolutionTimeReduction]}
+                          onValueChange={(value) => setResolutionTimeReduction(value[0])}
+                          max={80}
+                          min={0}
+                          step={5}
+                        />
+                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400">%</span>
+                        <p className='text-xs text-gray-500 mt-1'>{resolutionTimeReduction}% reduction (from {resolutionTime.toFixed(1)}h to {results.forecastedResolutionTime?.toFixed(1)}h)</p>
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="docHandlingHoursReduction" className="mb-2">
+                        Document Handling Hours Reduction (%)
+                        <button 
+                          className="ml-1 text-xs text-gray-400 hover:text-gray-600 focus:outline-none"
+                          onClick={() => setExpandedSections(prev => ({...prev, docHandlingHoursReduction: !prev.docHandlingHoursReduction}))}
+                        >
+                          {expandedSections.docHandlingHoursReduction ? '−' : '+'}
+                        </button>
+                      </Label>
+                      {expandedSections.docHandlingHoursReduction && (
+                        <div className="mb-2 p-2 bg-gray-50 rounded text-xs text-gray-600">
+                          Expected percentage reduction in annual hours spent on document handling due to automation and better organization.
+                        </div>
+                      )}
+                      <div className="relative">
+                        <Slider
+                          id="docHandlingHoursReduction"
+                          value={[docHandlingHoursReduction]}
+                          onValueChange={(value) => setDocHandlingHoursReduction(value[0])}
+                          max={70}
+                          min={0}
+                          step={5}
+                        />
+                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400">%</span>
+                        <p className='text-xs text-gray-500 mt-1'>{docHandlingHoursReduction}% reduction (from {docHandlingHours}h to {results.forecastedDocHandlingHours?.toFixed(0)}h)</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Cost Reduction Improvements */}
+                <div className="mb-8">
+                  <h3 className="text-lg font-semibold mb-4" style={{color: '#FFB347'}}>Cost Reduction Improvements</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <Label htmlFor="canopyCostReduction" className="mb-2">
+                        Canopy Cost Reduction (%)
+                        <button 
+                          className="ml-1 text-xs text-gray-400 hover:text-gray-600 focus:outline-none"
+                          onClick={() => setExpandedSections(prev => ({...prev, canopyCostReduction: !prev.canopyCostReduction}))}
+                        >
+                          {expandedSections.canopyCostReduction ? '−' : '+'}
+                        </button>
+                      </Label>
+                      {expandedSections.canopyCostReduction && (
+                        <div className="mb-2 p-2 bg-gray-50 rounded text-xs text-gray-600">
+                          Expected percentage reduction in Canopy subscription costs as the portal replaces some functionality.
+                        </div>
+                      )}
+                      <div className="relative">
+                        <Slider
+                          id="canopyCostReduction"
+                          value={[canopyCostReduction]}
+                          onValueChange={(value) => setCanopyCostReduction(value[0])}
+                          max={100}
+                          min={0}
+                          step={10}
+                        />
+                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400">%</span>
+                        <p className='text-xs text-gray-500 mt-1'>{canopyCostReduction}% reduction (from ${canopyCost.toLocaleString()} to ${results.forecastedCanopyCost?.toLocaleString()})</p>
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="dropboxCostReduction" className="mb-2">
+                        Dropbox Cost Reduction (%)
+                        <button 
+                          className="ml-1 text-xs text-gray-400 hover:text-gray-600 focus:outline-none"
+                          onClick={() => setExpandedSections(prev => ({...prev, dropboxCostReduction: !prev.dropboxCostReduction}))}
+                        >
+                          {expandedSections.dropboxCostReduction ? '−' : '+'}
+                        </button>
+                      </Label>
+                      {expandedSections.dropboxCostReduction && (
+                        <div className="mb-2 p-2 bg-gray-50 rounded text-xs text-gray-600">
+                          Expected percentage reduction in Dropbox costs as the portal provides integrated document storage.
+                        </div>
+                      )}
+                      <div className="relative">
+                        <Slider
+                          id="dropboxCostReduction"
+                          value={[dropboxCostReduction]}
+                          onValueChange={(value) => setDropboxCostReduction(value[0])}
+                          max={100}
+                          min={0}
+                          step={10}
+                        />
+                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400">%</span>
+                        <p className='text-xs text-gray-500 mt-1'>{dropboxCostReduction}% reduction (from ${dropboxCost.toLocaleString()} to ${results.forecastedDropboxCost?.toLocaleString()})</p>
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="esignCostReduction" className="mb-2">
+                        DocuSign/e-sign Cost Reduction (%)
+                        <button 
+                          className="ml-1 text-xs text-gray-400 hover:text-gray-600 focus:outline-none"
+                          onClick={() => setExpandedSections(prev => ({...prev, esignCostReduction: !prev.esignCostReduction}))}
+                        >
+                          {expandedSections.esignCostReduction ? '−' : '+'}
+                        </button>
+                      </Label>
+                      {expandedSections.esignCostReduction && (
+                        <div className="mb-2 p-2 bg-gray-50 rounded text-xs text-gray-600">
+                          Expected percentage reduction in DocuSign costs as the portal includes integrated e-signature capabilities.
+                        </div>
+                      )}
+                      <div className="relative">
+                        <Slider
+                          id="esignCostReduction"
+                          value={[esignCostReduction]}
+                          onValueChange={(value) => setEsignCostReduction(value[0])}
+                          max={100}
+                          min={0}
+                          step={10}
+                        />
+                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400">%</span>
+                        <p className='text-xs text-gray-500 mt-1'>{esignCostReduction}% reduction (from ${esignCost.toLocaleString()} to ${results.forecastedEsignCost?.toLocaleString()})</p>
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="docRiskBufferReduction" className="mb-2">
+                        Document Risk Buffer Reduction (%)
+                        <button 
+                          className="ml-1 text-xs text-gray-400 hover:text-gray-600 focus:outline-none"
+                          onClick={() => setExpandedSections(prev => ({...prev, docRiskBufferReduction: !prev.docRiskBufferReduction}))}
+                        >
+                          {expandedSections.docRiskBufferReduction ? '−' : '+'}
+                        </button>
+                      </Label>
+                      {expandedSections.docRiskBufferReduction && (
+                        <div className="mb-2 p-2 bg-gray-50 rounded text-xs text-gray-600">
+                          Expected percentage reduction in document risk buffer due to better compliance, audit trails, and reduced manual errors.
+                        </div>
+                      )}
+                      <div className="relative">
+                        <Slider
+                          id="docRiskBufferReduction"
+                          value={[docRiskBufferReduction]}
+                          onValueChange={(value) => setDocRiskBufferReduction(value[0])}
+                          max={80}
+                          min={0}
+                          step={5}
+                        />
+                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400">%</span>
+                        <p className='text-xs text-gray-500 mt-1'>{docRiskBufferReduction}% reduction (from ${docRiskBuffer.toLocaleString()} to ${results.forecastedDocRiskBuffer?.toLocaleString()})</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="capacityIncrease" className="mb-2">
+                    Capacity Gain (%)
+                    <button 
+                      className="ml-1 text-xs text-gray-400 hover:text-gray-600 focus:outline-none"
+                      onClick={() => setExpandedSections(prev => ({...prev, capacityIncrease: !prev.capacityIncrease}))}
+                    >
+                      {expandedSections.capacityIncrease ? '−' : '+'}
+                    </button>
+                  </Label>
+                  {expandedSections.capacityIncrease && (
+                    <div className="mb-2 p-2 bg-gray-50 rounded text-xs text-gray-600">
+                      The percentage increase in client capacity you expect to achieve with the portal. This accounts for faster onboarding and reduced manual work, allowing you to handle more clients with the same staff.
+                    </div>
+                  )}
+                  <div className="relative">
                     <Slider
-                      id="currentRetentionRate"
-                      min={50}
-                      max={95}
+                      id="capacityIncrease"
+                      value={[capacityIncrease]}
+                      onValueChange={(value) => setCapacityIncrease(value[0])}
+                      max={50}
+                      min={0}
                       step={1}
-                      value={[currentRetentionRate]}
-                      onValueChange={(value) => setCurrentRetentionRate(value[0])}
-                      className="mt-2"
                     />
-                    <Label htmlFor="retentionImprovement" className="mt-4 flex items-center gap-2">
-                      Target Retention Rate: {currentRetentionRate + retentionImprovement}%
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger>
-                            <HelpCircle className="h-4 w-4 text-gray-400" />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Expected retention improvement through better client tracking and follow-up</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </Label>
-                    <Slider
-                      id="retentionImprovement"
-                      min={0}
-                      max={10}
-                      step={0.1}
-                      value={[retentionImprovement]}
-                      onValueChange={([value]) => setRetentionImprovement(value)}
-                      className="mt-2"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="currentUpsellingRate" className="flex items-center gap-2">
-                      Current Upselling Rate: {currentUpsellingRate}%
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger>
-                            <HelpCircle className="h-4 w-4 text-gray-400" />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Current rate of upgrading clients to premium tiers</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </Label>
-                    <Slider
-                      id="currentUpsellingRate"
-                      min={0}
-                      max={20}
-                      step={0.5}
-                      value={[currentUpsellingRate]}
-                      onValueChange={(value) => setCurrentUpsellingRate(value[0])}
-                      className="mt-2"
-                    />
-                    <Label htmlFor="upsellingRate" className="mt-4 flex items-center gap-2">
-                      Target Upselling Rate: {currentUpsellingRate + upsellingRate}%
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger>
-                            <HelpCircle className="h-4 w-4 text-gray-400" />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Expected improvement in premium tier upgrades through better client insights</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </Label>
-                    <Slider
-                      id="upsellingRate"
-                      min={0}
-                      max={20}
-                      step={0.1}
-                      value={[upsellingRate]}
-                      onValueChange={([value]) => setUpsellingRate(value)}
-                      className="mt-2"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="currentAdminEfficiency" className="flex items-center gap-2">
-                      Current Admin Efficiency: {currentAdminEfficiency}%
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger>
-                            <HelpCircle className="h-4 w-4 text-gray-400" />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Current administrative efficiency before workflow automation</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </Label>
-                    <Slider
-                      id="currentAdminEfficiency"
-                      min={50}
-                      max={90}
-                      step={1}
-                      value={[currentAdminEfficiency]}
-                      onValueChange={(value) => setCurrentAdminEfficiency(value[0])}
-                      className="mt-2"
-                    />
-                    <Label htmlFor="adminEfficiencyRate" className="mt-4 flex items-center gap-2">
-                      Target Admin Efficiency: {currentAdminEfficiency + adminEfficiencyRate}%
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger>
-                            <HelpCircle className="h-4 w-4 text-gray-400" />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Expected 5-8 hours/week saved per rep/matchmaker through workflow automation</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </Label>
-                    <Slider
-                      id="adminEfficiencyRate"
-                      min={0}
-                      max={10}
-                      step={0.1}
-                      value={[adminEfficiencyRate]}
-                      onValueChange={([value]) => setAdminEfficiencyRate(value)}
-                      className="mt-2"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="currentErrorRate" className="flex items-center gap-2">
-                      Current Error Rate: {currentErrorRate}%
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger>
-                            <HelpCircle className="h-4 w-4 text-gray-400" />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Current rate of manual errors in lead routing and matchmaking</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </Label>
-                    <Slider
-                      id="currentErrorRate"
-                      min={0}
-                      max={10}
-                      step={0.1}
-                      value={[currentErrorRate]}
-                      onValueChange={(value) => setCurrentErrorRate(value[0])}
-                      className="mt-2"
-                    />
-                    <Label htmlFor="errorReductionRate" className="mt-4 flex items-center gap-2">
-                      Target Error Rate: {Math.max(0, currentErrorRate - errorReductionRate)}%
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger>
-                            <HelpCircle className="h-4 w-4 text-gray-400" />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Expected reduction in errors through automated workflows and better visibility</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </Label>
-                    <Slider
-                      id="errorReductionRate"
-                      min={0}
-                      max={currentErrorRate}
-                      step={0.1}
-                      value={[errorReductionRate]}
-                      onValueChange={([value]) => setErrorReductionRate(value)}
-                      className="mt-2"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="currentSalesProductivity" className="flex items-center gap-2">
-                      Current Sales Productivity: {currentSalesProductivity}%
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger>
-                            <HelpCircle className="h-4 w-4 text-gray-400" />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Current sales team productivity before CRM improvements</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </Label>
-                    <Slider
-                      id="currentSalesProductivity"
-                      min={50}
-                      max={90}
-                      step={1}
-                      value={[currentSalesProductivity]}
-                      onValueChange={(value) => setCurrentSalesProductivity(value[0])}
-                      className="mt-2"
-                    />
-                    <Label htmlFor="salesProductivityRate" className="mt-4 flex items-center gap-2">
-                      Target Sales Productivity: {currentSalesProductivity + salesProductivityRate}%
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger>
-                            <HelpCircle className="h-4 w-4 text-gray-400" />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Expected productivity gains through better lead management and automated workflows</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </Label>
-                    <Slider
-                      id="salesProductivityRate"
-                      min={0}
-                      max={30}
-                      step={0.1}
-                      value={[salesProductivityRate]}
-                      onValueChange={([value]) => setSalesProductivityRate(value)}
-                      className="mt-2"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="currentMatchmakerProductivity" className="flex items-center gap-2">
-                      Current Matchmaker Productivity: {currentMatchmakerProductivity}%
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger>
-                            <HelpCircle className="h-4 w-4 text-gray-400" />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Current matchmaker productivity before CRM improvements</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </Label>
-                    <Slider
-                      id="currentMatchmakerProductivity"
-                      min={50}
-                      max={90}
-                      step={1}
-                      value={[currentMatchmakerProductivity]}
-                      onValueChange={(value) => setCurrentMatchmakerProductivity(value[0])}
-                      className="mt-2"
-                    />
-                    <Label htmlFor="matchmakerProductivityRate" className="mt-4 flex items-center gap-2">
-                      Target Matchmaker Productivity: {currentMatchmakerProductivity + matchmakerProductivityRate}%
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger>
-                            <HelpCircle className="h-4 w-4 text-gray-400" />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Expected productivity gains through better client matching and automated workflows</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </Label>
-                    <Slider
-                      id="matchmakerProductivityRate"
-                      min={0}
-                      max={30}
-                      step={0.1}
-                      value={[matchmakerProductivityRate]}
-                      onValueChange={([value]) => setMatchmakerProductivityRate(value)}
-                      className="mt-2"
-                    />
+                    <p className='text-xs text-gray-500 mt-1'>{capacityIncrease.toFixed(2)}% increase</p>
                   </div>
                 </div>
               </CardContent>
@@ -989,7 +1442,7 @@ function App() {
               <CardContent className="pt-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <Label htmlFor="implementationType">Implementation Type</Label>
+                    <Label htmlFor="implementationType" className="mb-2">Implementation Type</Label>
                     <select
                       id="implementationType"
                       value={implementationType}
@@ -1000,108 +1453,92 @@ function App() {
                       <option value="homegrown">Homegrown Solution</option>
                     </select>
                   </div>
+                </div>
 
-                  <div>
-                    <Label htmlFor="crmImplementationCost">Initial Implementation Cost ($)</Label>
-                    <Input
-                      id="crmImplementationCost"
-                      type="number"
-                      value={crmImplementationCost}
-                      onChange={(e) => setCrmImplementationCost(Number(e.target.value))}
-                      className="border-[#04DFC6] focus:border-[#04DFC6]"
-                    />
-                    <p className="text-sm text-[#ACACAC] mt-1">
-                      {implementationType === 'sugarcrm' 
-                        ? 'Estimated: $125k-$200k' 
-                        : 'Estimated: $150k'}
-                    </p>
+                {/* One-Time Costs */}
+                <div className="mt-8">
+                  <h3 className="text-lg font-semibold mb-4" style={{color: '#04DFC6'}}>One-Time Costs</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <Label htmlFor="crmImplementationCost" className="mb-2">Initial Implementation Cost</Label>
+                      <div className="relative">
+                        <Slider
+                          id="crmImplementationCost"
+                          value={[crmImplementationCost]}
+                          onValueChange={(value) => setCrmImplementationCost(value[0])}
+                          max={500000}
+                          min={50000}
+                          step={5000}
+                        />
+                        <p className='text-xs text-gray-500 mt-1'>${crmImplementationCost.toLocaleString()}</p>
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="implementationTimeline" className="mb-2">Implementation Timeline (months)</Label>
+                      <div className="relative">
+                        <Slider
+                          id="implementationTimeline"
+                          value={[implementationTimeline]}
+                          onValueChange={(value) => setImplementationTimeline(value[0])}
+                          max={18}
+                          min={3}
+                          step={1}
+                        />
+                        <p className='text-xs text-gray-500 mt-1'>{implementationTimeline.toLocaleString()} months</p>
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="devHourlyRate" className="mb-2">Developer Hourly Rate</Label>
+                      <div className="relative">
+                        <Slider
+                          id="devHourlyRate"
+                          value={[devHourlyRate]}
+                          onValueChange={(value) => setDevHourlyRate(value[0])}
+                          max={200}
+                          min={75}
+                          step={5}
+                        />
+                        <p className='text-xs text-gray-500 mt-1'>${devHourlyRate.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} per hour</p>
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="trainingCostDay" className="mb-2">Training Cost per Day</Label>
+                      <div className="relative">
+                        <Slider
+                          id="trainingCostDay"
+                          value={[trainingCostDay]}
+                          onValueChange={(value) => setTrainingCostDay(value[0])}
+                          max={5000}
+                          min={1000}
+                          step={100}
+                        />
+                        <p className='text-xs text-gray-500 mt-1'>${trainingCostDay.toLocaleString()}</p>
+                      </div>
+                    </div>
                   </div>
+                </div>
 
-                  <div>
-                    <Label htmlFor="annualCrmLicense">Annual License/Maintenance ($)</Label>
-                    <Input
-                      id="annualCrmLicense"
-                      type="number"
-                      value={annualCrmLicense}
-                      onChange={(e) => setAnnualCrmLicense(Number(e.target.value))}
-                      className="border-[#04DFC6] focus:border-[#04DFC6]"
-                    />
-                    <p className="text-sm text-[#ACACAC] mt-1">
-                      {implementationType === 'sugarcrm' 
-                        ? 'Estimated: $25k-$50k/year' 
-                        : 'Estimated: $75k-$100k/year (internal team)'}
-                    </p>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="implementationTimeline">Implementation Timeline (months)</Label>
-                    <Input
-                      id="implementationTimeline"
-                      type="number"
-                      value={implementationTimeline}
-                      onChange={(e) => setImplementationTimeline(Number(e.target.value))}
-                      className="border-[#04DFC6] focus:border-[#04DFC6]"
-                    />
-                    <p className="text-sm text-[#ACACAC] mt-1">
-                      {implementationType === 'sugarcrm' 
-                        ? 'Estimated: 3-6 months' 
-                        : 'Estimated: 9-15 months'}
-                    </p>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="devHourlyRate">Developer Hourly Rate ($)</Label>
-                    <Input
-                      id="devHourlyRate"
-                      type="number"
-                      value={devHourlyRate}
-                      onChange={(e) => setDevHourlyRate(Number(e.target.value))}
-                      className="border-[#04DFC6] focus:border-[#04DFC6]"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="salesHourlyRate">Sales Hourly Rate ($)</Label>
-                    <Input
-                      id="salesHourlyRate"
-                      type="number"
-                      value={salesHourlyRate}
-                      onChange={(e) => setSalesHourlyRate(Number(e.target.value))}
-                      className="border-[#04DFC6] focus:border-[#04DFC6]"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="matchmakerHourlyRate">Matchmaker Hourly Rate ($)</Label>
-                    <Input
-                      id="matchmakerHourlyRate"
-                      type="number"
-                      value={matchmakerHourlyRate}
-                      onChange={(e) => setMatchmakerHourlyRate(Number(e.target.value))}
-                      className="border-[#04DFC6] focus:border-[#04DFC6]"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="adminHourlyRate">Admin Hourly Rate ($)</Label>
-                    <Input
-                      id="adminHourlyRate"
-                      type="number"
-                      value={adminHourlyRate}
-                      onChange={(e) => setAdminHourlyRate(Number(e.target.value))}
-                      className="border-[#04DFC6] focus:border-[#04DFC6]"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="trainingCostDay">Training Cost per Day ($)</Label>
-                    <Input
-                      id="trainingCostDay"
-                      type="number"
-                      value={trainingCostDay}
-                      onChange={(e) => setTrainingCostDay(Number(e.target.value))}
-                      className="border-[#04DFC6] focus:border-[#04DFC6]"
-                    />
+                {/* Recurring Costs */}
+                <div className="mt-8">
+                  <h3 className="text-lg font-semibold mb-4" style={{color: '#04DFC6'}}>Recurring Costs (Annual)</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <Label htmlFor="annualCrmLicense" className="mb-2">Annual License/Maintenance</Label>
+                      <div className="relative">
+                        <Slider
+                          id="annualCrmLicense"
+                          value={[annualCrmLicense]}
+                          onValueChange={(value) => setAnnualCrmLicense(value[0])}
+                          max={100000}
+                          min={10000}
+                          step={1000}
+                        />
+                        <p className='text-xs text-gray-500 mt-1'>${annualCrmLicense.toLocaleString()}</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -1211,6 +1648,22 @@ function App() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Just before the closing </div> for the left column (the first </div> after all input/configuration cards): */}
+            <Card className="border-2" style={{ borderColor: '#168CA6', marginTop: '16px', background: '#F8FCFD' }}>
+              <CardHeader className="pb-2 pt-4" style={{ background: 'transparent', borderTopLeftRadius: '0.5rem', borderTopRightRadius: '0.5rem' }}>
+                <CardTitle className="text-[#168CA6] font-bold">Strategic & Qualitative Benefits</CardTitle>
+              </CardHeader>
+              <CardContent className="pt-2 pb-4">
+                <ul className="list-disc list-inside text-sm text-[#168CA6] space-y-1">
+                  <li>Enhanced client satisfaction and retention</li>
+                  <li>Shorter sales/onboarding cycles</li>
+                  <li>Improved audit/compliance posture</li>
+                  <li>Increased staff retention due to less burnout</li>
+                  <li>Brand elevation via digital maturity</li>
+                </ul>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Right Column - Results */}
@@ -1230,18 +1683,108 @@ function App() {
               }}>
                 <CardTitle className="text-white font-bold">Results Summary</CardTitle>
                 <CardDescription className="text-white" style={{opacity: 0.92}}>
-                  Key ROI metrics and breakdown
+                  Key ROI metrics and breakdown (using forecasted improvements)
                 </CardDescription>
               </CardHeader>
               <CardContent className="pt-6">
+                {/* Baseline vs Forecasted Table */}
+                <div className="mb-6">
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full text-xs text-white border-separate border-spacing-y-1">
+                      <thead>
+                        <tr>
+                          <th className="pr-4 pb-1 text-left">Metric</th>
+                          <th className="pr-4 pb-1 text-right">Baseline</th>
+                          <th className="pr-4 pb-1 text-right">Forecasted</th>
+                          <th className="pb-1 text-right">Improvement</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>Onboarding Time (hrs)</td>
+                          <td className="text-right">{onboardingTimePre.toFixed(2)}</td>
+                          <td className="text-right">{results.forecastedOnboardingTime?.toFixed(2)}</td>
+                          <td className="text-right" style={{color: getImprovementColor('Onboarding Time (hrs)', onboardingTimePre, results.forecastedOnboardingTime)}}>
+                            {(100 * (1 - results.forecastedOnboardingTime / onboardingTimePre)).toFixed(0)}%
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>Duplicate Rate (%)</td>
+                          <td className="text-right">{duplicateRate.toFixed(2)}</td>
+                          <td className="text-right">{results.forecastedDuplicateRate?.toFixed(2)}</td>
+                          <td className="text-right" style={{color: getImprovementColor('Duplicate Rate (%)', duplicateRate, results.forecastedDuplicateRate)}}>
+                            {(100 * (1 - results.forecastedDuplicateRate / duplicateRate)).toFixed(0)}%
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>Resolution Time (hrs)</td>
+                          <td className="text-right">{resolutionTime.toFixed(2)}</td>
+                          <td className="text-right">{results.forecastedResolutionTime?.toFixed(2)}</td>
+                          <td className="text-right" style={{color: getImprovementColor('Resolution Time (hrs)', resolutionTime, results.forecastedResolutionTime)}}>
+                            {(100 * (1 - results.forecastedResolutionTime / resolutionTime)).toFixed(0)}%
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>Canopy Cost ($)</td>
+                          <td className="text-right">{canopyCost.toLocaleString()}</td>
+                          <td className="text-right">{results.forecastedCanopyCost?.toLocaleString()}</td>
+                          <td className="text-right" style={{color: getImprovementColor('Canopy Cost ($)', canopyCost, results.forecastedCanopyCost)}}>
+                            {(100 * (1 - results.forecastedCanopyCost / canopyCost)).toFixed(0)}%
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>Dropbox Cost ($)</td>
+                          <td className="text-right">{dropboxCost.toLocaleString()}</td>
+                          <td className="text-right">{results.forecastedDropboxCost?.toLocaleString()}</td>
+                          <td className="text-right" style={{color: getImprovementColor('Dropbox Cost ($)', dropboxCost, results.forecastedDropboxCost)}}>
+                            {(100 * (1 - results.forecastedDropboxCost / dropboxCost)).toFixed(0)}%
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>Esign Cost ($)</td>
+                          <td className="text-right">{esignCost.toLocaleString()}</td>
+                          <td className="text-right">{results.forecastedEsignCost?.toLocaleString()}</td>
+                          <td className="text-right" style={{color: getImprovementColor('Esign Cost ($)', esignCost, results.forecastedEsignCost)}}>
+                            {(100 * (1 - results.forecastedEsignCost / esignCost)).toFixed(0)}%
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>Doc Handling Hours (annual)</td>
+                          <td className="text-right">{docHandlingHours.toLocaleString()}</td>
+                          <td className="text-right">{results.forecastedDocHandlingHours?.toLocaleString()}</td>
+                          <td className="text-right" style={{color: getImprovementColor('Doc Handling Hours (annual)', docHandlingHours, results.forecastedDocHandlingHours)}}>
+                            {(100 * (1 - results.forecastedDocHandlingHours / docHandlingHours)).toFixed(0)}%
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>Doc Risk Buffer ($)</td>
+                          <td className="text-right">{docRiskBuffer.toLocaleString()}</td>
+                          <td className="text-right">{results.forecastedDocRiskBuffer?.toLocaleString()}</td>
+                          <td className="text-right" style={{color: getImprovementColor('Doc Risk Buffer ($)', docRiskBuffer, results.forecastedDocRiskBuffer)}}>
+                            {(100 * (1 - results.forecastedDocRiskBuffer / docRiskBuffer)).toFixed(0)}%
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>Capacity Gain (%)</td>
+                          <td className="text-right">0</td>
+                          <td className="text-right">{capacityIncrease.toFixed(2)}</td>
+                          <td className="text-right" style={{color: getImprovementColor('Capacity Gain (%)', 0, capacityIncrease)}}>
+                            {capacityIncrease.toFixed(2)}%
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+                {/* Existing summary below */}
                 <div className="space-y-6">
                   <div>
                     <div className="text-sm text-white font-semibold">Total Annual Benefits</div>
-                    <div className="text-xl font-semibold" style={{color: '#3DF08A'}}>${formatCurrency(results.totalBenefits)}</div>
+                    <div className="text-xl font-semibold" style={{color: '#3DF08A'}}>${formatCurrency(results.totalAnnualBenefits)}</div>
                   </div>
                   <div>
                     <div className="text-sm text-white font-semibold">Total Annual Costs</div>
-                    <div className="text-xl font-semibold" style={{color: '#B39BFF'}}>${formatCurrency(results.totalCosts)}</div>
+                    <div className="text-xl font-semibold" style={{color: '#B39BFF'}}>${formatCurrency(results.totalAnnualCosts)}</div>
                   </div>
                   <div>
                     <div className="text-sm text-white font-semibold">ROI</div>
@@ -1262,9 +1805,11 @@ function App() {
                       <ResponsiveContainer width="100%" height="100%">
                         <BarChart 
                           data={[
-                            { name: 'Revenue', value: results.breakdown.revenueUplift.total, color: '#7A39ED' },
-                            { name: 'Cost Savings', value: results.breakdown.costSavings.total, color: '#04DFC6' },
-                            { name: 'Productivity', value: results.breakdown.productivityGains.total, color: '#B2F000' }
+                            { name: 'Labor Efficiency', value: results.laborEfficiency, color: '#7A39ED' },
+                            { name: 'Error Reduction', value: results.errorReduction, color: '#04DFC6' },
+                            { name: 'Software Consolidation', value: results.softwareConsolidation, color: '#B2F000' },
+                            { name: 'Revenue Enablement', value: results.revenueEnablement, color: '#168CA6' },
+                            { name: 'Doc Handling & Risk', value: results.docHandlingBenefit, color: '#FFB347' }
                           ]}
                           margin={{ top: 20, right: 30, left: 20, bottom: 40 }}
                         >
@@ -1295,14 +1840,20 @@ function App() {
                             }}
                           />
                           <Bar dataKey="value" fill="#38003C">
-                            {results.breakdown.revenueUplift.total > 0 && (
+                            {results.laborEfficiency > 0 && (
                               <Cell fill="#7A39ED" />
                             )}
-                            {results.breakdown.costSavings.total > 0 && (
+                            {results.errorReduction > 0 && (
                               <Cell fill="#04DFC6" />
                             )}
-                            {results.breakdown.productivityGains.total > 0 && (
+                            {results.softwareConsolidation > 0 && (
                               <Cell fill="#B2F000" />
+                            )}
+                            {results.revenueEnablement > 0 && (
+                              <Cell fill="#168CA6" />
+                            )}
+                            {results.docHandlingBenefit > 0 && (
+                              <Cell fill="#FFB347" />
                             )}
                           </Bar>
                         </BarChart>

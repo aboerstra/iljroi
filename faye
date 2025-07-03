@@ -1,0 +1,183 @@
+Here is a detailed **Markdown guide** summarizing everything you need to know to correctly apply Faye branding and styles to any document or content, based on the official **Faye Brand Guidelines v1.0 (June 2021)**:
+
+---
+
+# Faye Brand Application Guide
+
+> **Version**: 1.0
+> **Date**: June 2021
+> **Tagline**: *We Eat Software*
+
+---
+
+## 🟣 1. Brand Colors
+
+### Primary Colors
+
+| Name               | HEX       | RGB             | Pantone      |
+| ------------------ | --------- | --------------- | ------------ |
+| **Faye Blueberry** | `#38003C` | (56, 0, 60)     | 2627 C       |
+| **Faye Green**     | `#16815A` | (22, 129, 90)   | 2244 C       |
+| **White**          | `#FFFFFF` | (255, 255, 255) | —            |
+| **Grey**           | `#ACACAC` | (172, 172, 172) | Cool Grey 4C |
+
+### Secondary "Techno" Colors
+
+| Name            | HEX       | RGB             | Pantone |
+| --------------- | --------- | --------------- | ------- |
+| **Tech Violet** | `#7A39ED` | (122, 55, 237)  | 2665 C  |
+| **Tech Pink**   | `#FFADDE` | (255, 173, 222) | 230 C   |
+| **Tech Teal**   | `#04DFC6` | (4, 223, 198)   | 2239 C  |
+| **Tech Lime**   | `#B2F000` | (178, 240, 0)   | 3570 C  |
+| **Tech Blue**   | `#1200F1` | (18, 0, 241)    | 2736 C  |
+
+> Use tints of dark tones or white to balance the energetic palette.
+
+---
+
+## 🔤 2. Typography
+
+### Headings
+
+* **Font**: `F37 Judge Condensed`
+* **Style**: Bold, geometric sans-serif
+* **Usage**: For large impactful headlines
+
+### Sub-Headings
+
+* **Font**: `Agrandir Wide Light` (by Pangram Pangram)
+* **Usage**: For quotes or section intros — *not* body copy
+
+### Body Text
+
+* **Font**: `Agrandir Regular`
+* **Style**: Futuristic, clean sans-serif
+
+---
+
+## 🔳 3. Logo Usage
+
+### Primary Logo
+
+* **Wordmark**: Flat-sided sans-serif "gaspipe" typography
+* **Icon**: Polygonal "F" (tech/gaming inspired)
+
+### Tagline Version
+
+* Always include the tagline “**We Eat Software**” either directly below or somewhere on the page.
+
+### Layout Flexibility
+
+* Horizontal or vertical orientation allowed
+* Maintain clarity and legibility at all sizes
+
+---
+
+## 🔧 4. Sub-brands & Integrations
+
+### Sub-brand Logos
+
+* **Axia**, **Flare**, and **Software by Faye** each have both stacked and horizontal formats.
+
+### Integrations
+
+* Combine logos with third-party brands (e.g. Zendesk, SugarCRM) in "stacked" lockups
+* Include “**Integrations by Faye**” in these graphics
+
+---
+
+## ☁️ 5. Brand Devices
+
+### The Faye Cloud
+
+* Central visual device (multi-color gradient blob)
+* Symbolizes cloud tech, strategy, and team strength
+* Used on brochures, websites, etc.
+* Often split or cropped into layouts
+
+### The Faye Polygon
+
+* Triangular device derived from the “F” icon
+* Flexible for housing images, icons, or decorative focus
+* Can be used as watermark, foreground element, etc.
+
+---
+
+## 🧾 6. Stationery & Collateral
+
+### Business Cards
+
+* Available in **purple** or **green**
+* Team members may mix colors (e.g., 50/50)
+
+### Letterheads
+
+* Printed on white stock with full-color backs
+* Optional green stock (Sparco or Hammermill) for surprise factor
+
+---
+
+## 📘 7. Document Types & Usage
+
+| Type                  | Color Theme                                                                   | Notes                                         |
+| --------------------- | ----------------------------------------------------------------------------- | --------------------------------------------- |
+| **Brand Brochure**    | Purple & White                                                                | Evergreen, general overview                   |
+| **Product Brochures** | Green                                                                         | For Salesforce, Sugar, etc.                   |
+| **Case Studies**      | Varied                                                                        | Room for personality, multiple layout options |
+| **One-Pagers**        | Purple (Axia), White (company), Rigid templates for integrations/enhancements |                                               |
+| **Reports**           | Structured annually                                                           | Use template from “Future of Software”        |
+| **Flare Brochure**    | Custom                                                                        | May differ slightly in color/style            |
+
+---
+
+## 🖥️ 8. Website & Landing Pages
+
+* Modular WordPress templates allow flexible design
+* Reuse landing page modules for new campaigns
+* Colors, Cloud device, and iconography must align with core brand palette
+
+---
+
+## 🧩 9. Templates & Presentations
+
+### Presentations
+
+* Master deck templates provided
+* Includes covers, agenda, data slides, testimonials, product details, etc.
+
+### Animations
+
+* Pre- and post-roll brand stingers
+* Modular animated assets: logos, transitions, intros
+* Use in video, webinars, product demos
+
+---
+
+## 🎁 10. Brand Merchandise & Packaging
+
+### Stickers
+
+* Circle designs with icons, slogans, and color variants
+
+### Onboarding Boxes
+
+* Include stickers, branded swag (socks, mugs)
+* Simple, bold, and unified branding
+
+---
+
+## ✅ Key Guidelines & Reminders
+
+* **Tagline**: Always include “We Eat Software” visibly
+* **Logo Variants**: Use the appropriate version for the asset
+* **Templates**: Reuse the provided layout files (esp. for case studies, brochures, decks)
+* **Cloud & Polygon**: Use them creatively, but stay within visual consistency
+* **Color System**: Follow the rules for different content types
+* **Sub-brands**: Respect their visual identity while keeping them tied to the core brand
+* **Animation**: Use prebuilt modules for consistency
+
+---
+
+If you're ever unsure about an element, reach out to the marketing team or a team leader for guidance or updated assets.
+
+Let me know if you'd like this exported to a Markdown file or applied to a sample Faye-styled asset.

@@ -1,11 +1,11 @@
-# CRM ROI Calculator - Complete Project Package
+# Asterix CRM ROI Calculator
 
-## 📦 Project Contents
+## 📦 Project Overview
 
-This zip file contains the complete CRM ROI Calculator project with all improvements and features implemented.
+A comprehensive CRM ROI Calculator built for It's Just Lunch, featuring interactive calculations, scenario analysis, and professional reporting capabilities.
 
 ### 🚀 Live Demo
-**Production URL**: https://wkjktzfn.manus.space
+**GitHub Pages**: https://aboerstra.github.io/asterix/
 
 ### 📁 Project Structure
 ```
